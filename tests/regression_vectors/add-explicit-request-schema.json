@@ -1,0 +1,22 @@
+{
+  "title": "Adding the first explicit request schema needs presence review",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Profiles", "version": "1"},
+    "paths": {"/profiles": {"post": {
+      "requestBody": {"content": {"application/json": {}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Profiles", "version": "1"},
+    "paths": {"/profiles": {"post": {
+      "requestBody": {"content": {"application/json": {"schema": {"type": "object"}}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "expected": [{
+    "severity": "review", "code": "schema.request.presence", "operation": "/paths/~1profiles/post",
+    "before": "/paths/~1profiles/post/requestBody/content/application~1json",
+    "after": "/paths/~1profiles/post/requestBody/content/application~1json/schema"
+  }]
+}

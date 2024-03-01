@@ -55,3 +55,15 @@ python -m ruff check .
 ```
 
 PyYAML is the sole runtime dependency. GitHub Actions runs tests, lint, and an installed CLI smoke test on Python 3.11 and 3.14. MIT licensed.
+
+### Regression vectors
+
+`tests/regression_vectors/` contains synthetic before/after OpenAPI documents and
+their expected findings. These cases cover operation matching, parameter overrides
+and requiredness, literal response and media keys, and the different directions of
+request and response schema compatibility. Each case checks the complete ordered
+list of severities, codes, and before/after/operation JSON Pointers. An empty
+`expected` list asserts that the comparison reports no changes.
+
+Run the corpus offline with `python -m pytest -q tests/test_regression_vectors.py`.
+Use `-k <scenario-slug>` to select a case by filename stem.
