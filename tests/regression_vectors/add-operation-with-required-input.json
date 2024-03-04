@@ -1,0 +1,21 @@
+{
+  "title": "Required inputs on an added operation do not break retained callers",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Tiles", "version": "1"},
+    "paths": {"/tiles": {"get": {"responses": {"200": {"description": "List"}}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Tiles", "version": "1"},
+    "paths": {"/tiles": {
+      "get": {"responses": {"200": {"description": "List"}}},
+      "post": {
+        "parameters": [{"in": "query", "name": "size", "required": true, "schema": {"type": "integer"}}],
+        "responses": {"201": {"description": "Created"}}
+      }
+    }}
+  },
+  "expected": [{
+    "severity": "non-breaking", "code": "operation.added",
+    "before": null, "after": "/paths/~1tiles/post", "operation": "/paths/~1tiles/post"
+  }]
+}
