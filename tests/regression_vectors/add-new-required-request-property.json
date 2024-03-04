@@ -1,0 +1,24 @@
+{
+  "title": "Adding a required request field reports requiredness only",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Profiles", "version": "1"},
+    "paths": {"/profiles": {"post": {
+      "requestBody": {"content": {"application/json": {"schema": {"type": "object"}}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Profiles", "version": "1"},
+    "paths": {"/profiles": {"post": {
+      "requestBody": {"content": {"application/json": {"schema": {
+        "type": "object", "properties": {"label": {"type": "string"}}, "required": ["label"]
+      }}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "schema.request.required", "operation": "/paths/~1profiles/post",
+    "before": "/paths/~1profiles/post/requestBody/content/application~1json/schema",
+    "after": "/paths/~1profiles/post/requestBody/content/application~1json/schema/required"
+  }]
+}
