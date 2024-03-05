@@ -1,0 +1,18 @@
+{
+  "title": "Adding a body with no required flag is compatible",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Stamps", "version": "1"},
+    "paths": {"/stamps": {"post": {"responses": {"204": {"description": "Saved"}}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Stamps", "version": "1"},
+    "paths": {"/stamps": {"post": {
+      "requestBody": {"content": {"text/plain": {"schema": {"type": "string"}}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "expected": [{
+    "severity": "non-breaking", "code": "body.added",
+    "before": null, "after": "/paths/~1stamps/post/requestBody", "operation": "/paths/~1stamps/post"
+  }]
+}
