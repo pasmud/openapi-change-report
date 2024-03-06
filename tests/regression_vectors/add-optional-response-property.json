@@ -1,0 +1,21 @@
+{
+  "title": "Documenting an extra optional response field is compatible",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Profiles", "version": "1"},
+    "paths": {"/profiles": {"get": {"responses": {"200": {
+      "description": "Profile", "content": {"application/json": {"schema": {"type": "object"}}}
+    }}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Profiles", "version": "1"},
+    "paths": {"/profiles": {"get": {"responses": {"200": {
+      "description": "Profile", "content": {"application/json": {"schema": {
+        "type": "object", "properties": {"label": {"type": "string"}}
+      }}}
+    }}}}}
+  },
+  "expected": [{
+    "severity": "non-breaking", "code": "schema.response.property", "operation": "/paths/~1profiles/get",
+    "before": null, "after": "/paths/~1profiles/get/responses/200/content/application~1json/schema/properties/label"
+  }]
+}
