@@ -4,11 +4,10 @@ import re
 from dataclasses import replace
 
 from .changes import Change, sort_changes
-from .content import content_changes, response_content_changes
+from .content import content_changes, parameter_schema_changes, response_content_changes
 from .document import Document, InputError, mapping, pointer
 from .inputs import effective_parameters, paired_bodies, parameter_changes
 from .references import Located
-from .schemas import schema_changes
 
 HTTP_METHODS = frozenset({"get", "put", "post", "delete", "options", "head", "patch", "trace"})
 STATUS = re.compile(r"(?:[1-5](?:[0-9]{2}|XX)|default)")
@@ -73,12 +72,7 @@ def input_changes(before: Document, after: Document, old_path: Located, new_path
     else:
         changes = parameter_changes(old_params, new_params)
         for key in sorted(old_params.keys() & new_params.keys()):
-            previous, current = old_params[key], new_params[key]
-            if "content" in previous.value or "content" in current.value:
-                changes.append(Change("review", "parameter.content", "Content-based parameters are not compared.",
-                                      previous.at, current.at))
-            else:
-                changes.extend(schema_changes(before, after, previous, current, "request"))
+            changes.extend(parameter_schema_changes(before, after, old_params[key], new_params[key]))
 
     old_body, new_body, body_findings = paired_bodies(before, after, old, new)
     changes.extend(body_findings)

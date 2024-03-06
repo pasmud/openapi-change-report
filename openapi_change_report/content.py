@@ -1,9 +1,34 @@
 """Match request and response representations by literal media type key."""
 
 from .changes import Change
-from .document import Document, mapping, pointer
+from .document import Document, InputError, mapping, pointer
 from .references import Located, UnresolvedReference, resolve
 from .schemas import schema_changes
+
+
+def parameter_representation(parameter: Located) -> tuple[str | None, Located]:
+    if "content" not in parameter.value:
+        return None, parameter
+    at = pointer(parameter.at, "content")
+    if "schema" in parameter.value:
+        raise InputError(f"{at}: a parameter cannot define both schema and content")
+    types = mapping(parameter.value["content"], at)
+    if len(types) != 1:
+        raise InputError(f"{at}: expected exactly one parameter media type")
+    media, value = next(iter(types.items()))
+    media_at = pointer(at, media)
+    return media, Located(mapping(value, media_at), media_at)
+
+
+def parameter_schema_changes(before: Document, after: Document, old: Located, new: Located) -> list[Change]:
+    old_media, previous = parameter_representation(old)
+    new_media, current = parameter_representation(new)
+    if old_media != new_media:
+        message = ("Parameter switched between direct schema and media content."
+                   if old_media is None or new_media is None
+                   else f"Parameter media type changed from {old_media!r} to {new_media!r}.")
+        return [Change("review", "parameter.content", message, previous.at, current.at)]
+    return schema_changes(before, after, previous, current, "request")
 
 
 def content_changes(before: Document, after: Document, old: Located, new: Located,

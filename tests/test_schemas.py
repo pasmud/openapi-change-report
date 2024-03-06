@@ -2,6 +2,7 @@ import pytest
 from test_compare import document
 
 from openapi_change_report.compare import compare
+from openapi_change_report.document import InputError
 
 JSON = "application/json"
 OP = "/paths/~1letters/post"
@@ -100,6 +101,51 @@ def test_parameter_schemas_use_request_rules_and_enum_order_is_ignored():
     assert compare(make(["red", "blue"]), make(["blue", "red"])) == []
     (change,) = compare(make(["red", "blue"]), make(["red"]))
     assert (change.severity, change.after) == ("breaking", "/paths/~1letters/get/parameters/0/schema/enum")
+
+
+def with_filter(**representation):
+    paths = {"/letters": {"post": {"parameters": [{"$ref": "#/components/parameters/Filter"}]}}}
+    param = {"name": "filter", "in": "query", **representation}
+    return document(paths, components={"parameters": {"Filter": param}})
+
+
+def test_parameter_content_compares_matching_media_using_request_rules():
+    def make(enum):
+        return with_filter(content={JSON: {"schema": {"type": "string", "enum": enum}}})
+
+    wide, narrow = make(["domestic", "international"]), make(["domestic"])
+    (change,) = compare(wide, narrow)
+    at = "/components/parameters/Filter/content/application~1json/schema/enum"
+    assert (change.code, change.severity, change.before, change.after, change.operation) == (
+        "schema.request.enum", "breaking", at, at, OP,
+    )
+    assert [change.severity for change in compare(narrow, wide)] == ["non-breaking"]
+    assert compare(wide, wide) == []
+
+
+@pytest.mark.parametrize(("representation", "suffix", "message"), [
+    ({"schema": {"type": "integer"}}, "", "switched between direct schema and media content"),
+    ({"content": {"text/plain": {"schema": {"type": "integer"}}}}, "/content/text~1plain", "media type changed"),
+])
+def test_parameter_representation_switch_needs_review(representation, suffix, message):
+    old = with_filter(content={JSON: {"schema": {"type": "string"}}})
+    (change,) = compare(old, with_filter(**representation))
+    base = "/components/parameters/Filter"
+    assert (change.code, change.severity, change.before, change.after) == (
+        "parameter.content", "review", base + "/content/application~1json", base + suffix,
+    )
+    assert message in change.message
+
+
+@pytest.mark.parametrize(("representation", "message"), [
+    ({"content": {}}, "expected exactly one parameter media type"),
+    ({"content": {JSON: {}, "text/plain": {}}}, "expected exactly one parameter media type"),
+    ({"content": {JSON: []}}, "application~1json: expected an object"),
+    ({"content": {JSON: {}}, "schema": {}}, "cannot define both schema and content"),
+])
+def test_checked_parameter_content_must_have_one_media_object(representation, message):
+    with pytest.raises(InputError, match=f"/components/parameters/Filter/content.*{message}"):
+        compare(with_filter(content={JSON: {}}), with_filter(**representation))
 
 
 def test_openapi_30_supported_subset_and_nullable_boundary():
