@@ -1,0 +1,12 @@
+{
+  "title": "A metadata-only path does not add an operation",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Tiles", "version": "1"},
+    "paths": {}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Tiles", "version": "1"},
+    "paths": {"/future": {"summary": "Reserved", "x-owner": "catalog"}}
+  },
+  "expected": []
+}
