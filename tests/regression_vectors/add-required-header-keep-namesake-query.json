@@ -1,0 +1,24 @@
+{
+  "title": "A namesake query parameter does not satisfy a new required header",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {"get": {
+      "parameters": [{"in": "query", "name": "Locale", "schema": {"type": "string"}}],
+      "responses": {"200": {"description": "List"}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {"get": {
+      "parameters": [
+        {"in": "query", "name": "Locale", "schema": {"type": "string"}},
+        {"in": "header", "name": "Locale", "required": true, "schema": {"type": "string"}}
+      ],
+      "responses": {"200": {"description": "List"}}
+    }}}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "parameter.required",
+    "before": null, "after": "/paths/~1books/get/parameters/1/required", "operation": "/paths/~1books/get"
+  }]
+}
