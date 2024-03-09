@@ -1,0 +1,18 @@
+{
+  "title": "Adding an explicit status beside its range is a literal addition",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Receipts", "version": "1"},
+    "paths": {"/receipts": {"post": {"responses": {"2XX": {"description": "Success"}}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Receipts", "version": "1"},
+    "paths": {"/receipts": {"post": {"responses": {
+      "202": {"description": "Queued", "content": {"text/plain": {"schema": {"type": "string"}}}},
+      "2XX": {"description": "Success"}
+    }}}}
+  },
+  "expected": [{
+    "severity": "non-breaking", "code": "response.added",
+    "before": null, "after": "/paths/~1receipts/post/responses/202", "operation": "/paths/~1receipts/post"
+  }]
+}
