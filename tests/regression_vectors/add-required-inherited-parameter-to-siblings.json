@@ -1,0 +1,22 @@
+{
+  "title": "One new inherited requirement reports both affected operations",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {
+      "head": {"responses": {"200": {"description": "Available"}}},
+      "get": {"responses": {"200": {"description": "List"}}}
+    }}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {
+      "parameters": [{"in": "query", "name": "locale", "required": true, "schema": {"type": "string"}}],
+      "head": {"responses": {"200": {"description": "Available"}}},
+      "get": {"responses": {"200": {"description": "List"}}}
+    }}
+  },
+  "expected": [
+    {"severity": "breaking", "code": "parameter.required", "before": null, "after": "/paths/~1books/parameters/0/required", "operation": "/paths/~1books/get"},
+    {"severity": "breaking", "code": "parameter.required", "before": null, "after": "/paths/~1books/parameters/0/required", "operation": "/paths/~1books/head"}
+  ]
+}
