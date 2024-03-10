@@ -1,0 +1,20 @@
+{
+  "title": "Typing an unconstrained response narrows its possible outputs",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Scores", "version": "1"},
+    "paths": {"/scores": {"get": {"responses": {"200": {
+      "description": "Score", "content": {"application/json": {"schema": {}}}
+    }}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Scores", "version": "1"},
+    "paths": {"/scores": {"get": {"responses": {"200": {
+      "description": "Score", "content": {"application/json": {"schema": {"type": "string"}}}
+    }}}}}
+  },
+  "expected": [{
+    "severity": "non-breaking", "code": "schema.response.type", "operation": "/paths/~1scores/get",
+    "before": "/paths/~1scores/get/responses/200/content/application~1json/schema",
+    "after": "/paths/~1scores/get/responses/200/content/application~1json/schema/type"
+  }]
+}
