@@ -1,0 +1,24 @@
+{
+  "title": "Adding a request items constraint narrows accepted array elements",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Scores", "version": "1"},
+    "paths": {"/scores": {"post": {
+      "requestBody": {"content": {"application/json": {"schema": {"type": "array"}}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Scores", "version": "1"},
+    "paths": {"/scores": {"post": {
+      "requestBody": {"content": {"application/json": {"schema": {
+        "type": "array", "items": {"type": "integer"}
+      }}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "schema.request.type", "operation": "/paths/~1scores/post",
+    "before": "/paths/~1scores/post/requestBody/content/application~1json/schema",
+    "after": "/paths/~1scores/post/requestBody/content/application~1json/schema/items/type"
+  }]
+}
