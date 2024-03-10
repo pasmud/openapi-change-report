@@ -1,0 +1,21 @@
+{
+  "title": "Adding an enum to an open query schema restricts valid inputs",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Paint", "version": "1"},
+    "paths": {"/paint": {"get": {
+      "parameters": [{"in": "query", "name": "color", "schema": {"type": "string"}}],
+      "responses": {"200": {"description": "Palette"}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Paint", "version": "1"},
+    "paths": {"/paint": {"get": {
+      "parameters": [{"in": "query", "name": "color", "schema": {"type": "string", "enum": ["blue"]}}],
+      "responses": {"200": {"description": "Palette"}}
+    }}}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "schema.request.enum", "operation": "/paths/~1paint/get",
+    "before": "/paths/~1paint/get/parameters/0/schema", "after": "/paths/~1paint/get/parameters/0/schema/enum"
+  }]
+}
