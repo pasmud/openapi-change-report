@@ -1,0 +1,22 @@
+{
+  "title": "A parameter media switch is review, not a request schema change",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {"get": {
+      "parameters": [{"in": "query", "name": "filter", "content": {"application/json": {"schema": {"type": "object"}}}}],
+      "responses": {"200": {"description": "List"}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {"get": {
+      "parameters": [{"in": "query", "name": "filter", "content": {"text/plain": {"schema": {"type": "string"}}}}],
+      "responses": {"200": {"description": "List"}}
+    }}}
+  },
+  "expected": [{
+    "severity": "review", "code": "parameter.content", "operation": "/paths/~1books/get",
+    "before": "/paths/~1books/get/parameters/0/content/application~1json",
+    "after": "/paths/~1books/get/parameters/0/content/text~1plain"
+  }]
+}
