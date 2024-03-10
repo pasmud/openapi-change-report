@@ -1,0 +1,20 @@
+{
+  "title": "Adding an enum to a response schema restricts outputs compatibly",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Paint", "version": "1"},
+    "paths": {"/paint": {"get": {"responses": {"200": {
+      "description": "Color", "content": {"application/json": {"schema": {"type": "string"}}}
+    }}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Paint", "version": "1"},
+    "paths": {"/paint": {"get": {"responses": {"200": {
+      "description": "Color", "content": {"application/json": {"schema": {"type": "string", "enum": ["blue"]}}}
+    }}}}}
+  },
+  "expected": [{
+    "severity": "non-breaking", "code": "schema.response.enum", "operation": "/paths/~1paint/get",
+    "before": "/paths/~1paint/get/responses/200/content/application~1json/schema",
+    "after": "/paths/~1paint/get/responses/200/content/application~1json/schema/enum"
+  }]
+}
