@@ -1,0 +1,22 @@
+{
+  "title": "Removing an optional output field breaks with an escaped pointer",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Profiles", "version": "1"},
+    "paths": {"/profiles": {"get": {"responses": {"200": {
+      "description": "Profile", "content": {"application/json": {"schema": {
+        "type": "object", "properties": {"tag/~draft": {"type": "string"}}
+      }}}
+    }}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Profiles", "version": "1"},
+    "paths": {"/profiles": {"get": {"responses": {"200": {
+      "description": "Profile", "content": {"application/json": {"schema": {"type": "object"}}}
+    }}}}}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "schema.response.property", "operation": "/paths/~1profiles/get",
+    "before": "/paths/~1profiles/get/responses/200/content/application~1json/schema/properties/tag~1~0draft",
+    "after": null
+  }]
+}
