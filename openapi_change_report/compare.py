@@ -1,22 +1,15 @@
 """Collect changes on the HTTP operation surface."""
 
 import re
-from dataclasses import dataclass
+from dataclasses import replace
 
+from .changes import Change, sort_changes
 from .document import Document, InputError, mapping, pointer
+from .inputs import effective_parameters, paired_bodies, parameter_changes
+from .references import Located
 
 HTTP_METHODS = frozenset({"get", "put", "post", "delete", "options", "head", "patch", "trace"})
-SEVERITY_ORDER = {"breaking": 0, "review": 1, "non-breaking": 2}
 STATUS = re.compile(r"(?:[1-5](?:[0-9]{2}|XX)|default)")
-
-
-@dataclass(frozen=True)
-class Change:
-    severity: str
-    code: str
-    message: str
-    before: str | None = None
-    after: str | None = None
 
 
 def path_items(doc: Document) -> dict:
@@ -64,6 +57,23 @@ def response_changes(old: dict, new: dict, at: str) -> list[Change]:
     ]
 
 
+def input_changes(before: Document, after: Document, old_path: Located, new_path: Located,
+                  old: Located, new: Located) -> list[Change]:
+    old_params, old_issues = effective_parameters(before, old_path, old)
+    new_params, new_issues = effective_parameters(after, new_path, new)
+    if old_issues or new_issues:
+        changes = []
+        for at in sorted(old_issues.keys() | new_issues.keys()):
+            messages = {issue[at] for issue in (old_issues, new_issues) if at in issue}
+            changes.append(Change("review", "parameter.reference", "Parameter comparison skipped. "
+                                  + " ".join(sorted(messages)),
+                                  at if at in old_issues else None, at if at in new_issues else None))
+    else:
+        changes = parameter_changes(old_params, new_params)
+    _, _, body_findings = paired_bodies(before, after, old, new)
+    return changes + body_findings
+
+
 def compare(before: Document, after: Document) -> list[Change]:
     """Return changes in severity and location order, independent of input key order."""
     changes = []
@@ -85,5 +95,7 @@ def compare(before: Document, after: Document) -> list[Change]:
                 changes.append(Change("non-breaking", "operation.added", "Added operation.", after=location))
             else:
                 changes.extend(response_changes(old_ops[method], new_ops[method], location))
-    return sorted(changes, key=lambda c: (SEVERITY_ORDER[c.severity], c.after or c.before or "",
-                                         c.code, c.before or "", c.after or "", c.message))
+                findings = input_changes(before, after, Located(old_item, at), Located(new_item, at),
+                                         Located(old_ops[method], location), Located(new_ops[method], location))
+                changes.extend(replace(change, operation=location) for change in findings)
+    return sort_changes(changes)
