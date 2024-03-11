@@ -1,0 +1,24 @@
+{
+  "title": "Dropping an override exposes the required path-level parameter",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {
+      "parameters": [{"in": "query", "name": "locale", "required": true, "schema": {"type": "string"}}],
+      "get": {
+        "parameters": [{"in": "query", "name": "locale", "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "List"}}
+      }
+    }}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {
+      "parameters": [{"in": "query", "name": "locale", "required": true, "schema": {"type": "string"}}],
+      "get": {"responses": {"200": {"description": "List"}}}
+    }}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "parameter.required", "operation": "/paths/~1books/get",
+    "before": "/paths/~1books/get/parameters/0", "after": "/paths/~1books/parameters/0/required"
+  }]
+}
