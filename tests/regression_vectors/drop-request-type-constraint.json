@@ -1,0 +1,22 @@
+{
+  "title": "Removing a request type constraint widens accepted inputs",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Scores", "version": "1"},
+    "paths": {"/scores": {"post": {
+      "requestBody": {"content": {"application/json": {"schema": {"type": "number"}}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Scores", "version": "1"},
+    "paths": {"/scores": {"post": {
+      "requestBody": {"content": {"application/json": {"schema": {}}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "expected": [{
+    "severity": "non-breaking", "code": "schema.request.type", "operation": "/paths/~1scores/post",
+    "before": "/paths/~1scores/post/requestBody/content/application~1json/schema/type",
+    "after": "/paths/~1scores/post/requestBody/content/application~1json/schema"
+  }]
+}
