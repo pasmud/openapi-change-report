@@ -1,0 +1,22 @@
+{
+  "title": "Removing only a request enum accepts any value of the retained type",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Paint", "version": "1"},
+    "paths": {"/paint": {"post": {
+      "requestBody": {"content": {"application/json": {"schema": {"type": "string", "enum": ["blue"]}}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Paint", "version": "1"},
+    "paths": {"/paint": {"post": {
+      "requestBody": {"content": {"application/json": {"schema": {"type": "string"}}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "expected": [{
+    "severity": "non-breaking", "code": "schema.request.enum", "operation": "/paths/~1paint/post",
+    "before": "/paths/~1paint/post/requestBody/content/application~1json/schema/enum",
+    "after": "/paths/~1paint/post/requestBody/content/application~1json/schema"
+  }]
+}
