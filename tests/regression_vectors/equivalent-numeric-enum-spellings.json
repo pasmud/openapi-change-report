@@ -1,0 +1,16 @@
+{
+  "title": "Reordered numeric enums tolerate equivalent decimal spellings",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Scores", "version": "1"},
+    "paths": {"/scores": {"get": {"responses": {"200": {
+      "description": "Score", "content": {"application/json": {"schema": {"enum": [1, 1.25]}}}
+    }}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Scores", "version": "1"},
+    "paths": {"/scores": {"get": {"responses": {"200": {
+      "description": "Score", "content": {"application/json": {"schema": {"enum": [1.25, 1.0]}}}
+    }}}}}
+  },
+  "expected": []
+}
