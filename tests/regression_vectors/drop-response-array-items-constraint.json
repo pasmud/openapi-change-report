@@ -1,0 +1,24 @@
+{
+  "title": "Dropping a nested response items type broadens possible elements",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Scores", "version": "1"},
+    "paths": {"/scores": {"get": {"responses": {"200": {
+      "description": "Rows", "content": {"application/json": {"schema": {
+        "type": "array", "items": {"type": "array", "items": {"type": "integer"}}
+      }}}
+    }}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Scores", "version": "1"},
+    "paths": {"/scores": {"get": {"responses": {"200": {
+      "description": "Rows", "content": {"application/json": {"schema": {
+        "type": "array", "items": {"type": "array"}
+      }}}
+    }}}}}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "schema.response.type", "operation": "/paths/~1scores/get",
+    "before": "/paths/~1scores/get/responses/200/content/application~1json/schema/items/items/type",
+    "after": "/paths/~1scores/get/responses/200/content/application~1json/schema/items"
+  }]
+}
