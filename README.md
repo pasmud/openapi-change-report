@@ -19,13 +19,13 @@ Both specs describe a fictional parcel-label API. The comparison reports **6 bre
 ## CLI contract
 
 ```text
-openapi-change-report BEFORE AFTER [--format markdown|json] [--fail-on breaking|review|never]
+openapi-change-report BEFORE AFTER [--format markdown|json] [--fail-on breaking|review|any|never]
 ```
 
 - **Inputs:** One UTF-8 document per file, with an optional BOM. The `.json`, `.yaml`, or `.yml` extension selects the parser; files may use different formats. Supported version strings are `3.0.x` and `3.1.x`. JSON and YAML reject duplicate mapping keys and non-string keys. Quote numeric YAML keys such as `'200'`. YAML uses decimal JSON-style numbers, lowercase `true`/`false`/`null`, and accepts `~` and empty values as null. Explicit tags and aliases (including alias-based merges) are unsupported.
 - **Output:** Markdown by default. JSON has `report_version: 1`, a `summary` count for each severity, and a `changes` array. Each record has `severity`, `code`, `message`, `before`, `after`, and `operation`. Reports omit timestamps and source filenames and sort by severity, location (after or before), rule code, and tie-breakers. Object-key order does not affect output; changing a parameter's array index changes its location.
 - **Locations:** `before`/`after` are [RFC 6901 JSON Pointers](https://www.rfc-editor.org/rfc/rfc6901) into the respective files (`null` means no corresponding node). A missing keyword whose default is relevant points to its containing object. Pointers to resolved components identify the definition, and `operation` identifies the affected endpoint even when the finding comes from a shared definition. For example, `/paths/~1labels/post/parameters/0/required` addresses the fake header requirement. Use JSON for exact pointer text.
-- **Exit codes:** `0` means no findings met the threshold; `1` means at least one did, with the report still on stdout. The default `breaking` threshold fails only on breaking findings. `review` fails on breaking or review; `never` only disables finding-based failures. `2` indicates usage, file, parse, or checked structural errors; diagnostics go to stderr and no report is emitted.
+- **Exit codes:** `0` means no findings met the threshold; `1` means at least one did, with the report still on stdout. The default `breaking` threshold fails only on breaking findings. `review` fails on breaking or review. Use `any` during a contract freeze to flag even non-breaking findings, such as a new operation. `never` disables finding-based failures. `2` indicates usage, file, parse, or checked structural errors regardless of threshold; diagnostics go to stderr and no report is emitted.
 
 ## Comparison policy
 

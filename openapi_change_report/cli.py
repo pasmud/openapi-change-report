@@ -4,9 +4,17 @@ import argparse
 import sys
 from pathlib import Path
 
+from .changes import SEVERITY_ORDER
 from .compare import compare
 from .document import InputError, load
 from .report import json_report, markdown_report
+
+FAILURE_SEVERITIES = {
+    "breaking": {"breaking"},
+    "review": {"breaking", "review"},
+    "any": set(SEVERITY_ORDER),
+    "never": set(),
+}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -15,8 +23,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("before", type=Path, help="baseline .json, .yaml or .yml file")
     parser.add_argument("after", type=Path, help="candidate .json, .yaml or .yml file")
     parser.add_argument("--format", choices=("markdown", "json"), default="markdown", help="report format")
-    parser.add_argument("--fail-on", choices=("breaking", "review", "never"), default="breaking",
-                        help="exit 1 on breaking findings (default), breaking or review, or neither")
+    parser.add_argument("--fail-on", choices=FAILURE_SEVERITIES, default="breaking",
+                        help="exit 1 on breaking findings (default), breaking or review, any finding, or none")
     args = parser.parse_args(argv)
 
     documents = []
@@ -34,5 +42,4 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     sys.stdout.write(json_report(changes) if args.format == "json" else markdown_report(changes))
-    failures = {"breaking": {"breaking"}, "review": {"breaking", "review"}, "never": set()}
-    return int(any(change.severity in failures[args.fail_on] for change in changes))
+    return int(any(change.severity in FAILURE_SEVERITIES[args.fail_on] for change in changes))

@@ -44,6 +44,25 @@ def test_review_threshold_and_unsupported_reference(tmp_path):
     assert "Path Item references are not compared." in strict.stdout
 
 
+def test_any_threshold_can_gate_non_breaking_additions(tmp_path):
+    before, after = tmp_path / "before.json", tmp_path / "after.json"
+    before.write_text('{"openapi":"3.1.0","paths":{}}', encoding="utf-8")
+    after.write_text('{"openapi":"3.1.0","paths":{"/notes":{"get":{}}}}', encoding="utf-8")
+    args = (str(before), str(after), "--format", "json")
+    default = cli(*args)
+    assert (default.returncode, default.stderr) == (0, "")
+    report = json.loads(default.stdout)
+    assert report["summary"] == {"breaking": 0, "review": 0, "non-breaking": 1}
+    assert [change["code"] for change in report["changes"]] == ["operation.added"]
+    for policy, expected in (("any", 1), ("review", 0)):
+        result = cli(*args, "--fail-on", policy)
+        assert (result.returncode, result.stdout, result.stderr) == (expected, default.stdout, "")
+
+    identical = cli(str(after), str(after), "--format", "json", "--fail-on", "any")
+    assert (identical.returncode, identical.stderr) == (0, "")
+    assert json.loads(identical.stdout)["changes"] == []
+
+
 @pytest.mark.parametrize(("filename", "content", "message"), [
     ("missing.yaml", None, "No such file"),
     ("notes.json", '{"openapi":"3.1.0","openapi":"3.1.1"}', "duplicate mapping key"),
@@ -58,11 +77,12 @@ def test_input_failures_have_no_report(tmp_path, filename, content, message):
     assert "before" in result.stderr and message in result.stderr and "Traceback" not in result.stderr
 
 
-def test_structural_error_includes_pointer_and_never_is_not_an_error_override(tmp_path):
+@pytest.mark.parametrize("policy", ["never", "any"])
+def test_structural_error_includes_pointer_and_takes_precedence_over_policy(tmp_path, policy):
     before, after = tmp_path / "before.json", tmp_path / "after.json"
     before.write_text('{"openapi":"3.1.0","paths":{}}', encoding="utf-8")
     after.write_text('{"openapi":"3.1.0","paths":{"/notes":{"get":{"responses":[]}}}}', encoding="utf-8")
-    result = cli(str(before), str(after), "--fail-on", "never")
+    result = cli(str(before), str(after), "--fail-on", policy)
     assert (result.returncode, result.stdout) == (2, "")
     assert "/paths/~1notes/get/responses: expected an object" in result.stderr
 
