@@ -1,0 +1,16 @@
+{
+  "title": "Response map extension keys never count as status changes",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Receipts", "version": "1"},
+    "paths": {"/receipts": {"get": {"responses": {
+      "200": {"description": "Found"}, "x-previous-owner": "catalog"
+    }}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Receipts", "version": "1"},
+    "paths": {"/receipts": {"get": {"responses": {
+      "x-owner": "archive", "200": {"description": "Found"}
+    }}}}
+  },
+  "expected": []
+}
