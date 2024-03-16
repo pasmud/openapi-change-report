@@ -4,9 +4,11 @@ import re
 from dataclasses import replace
 
 from .changes import Change, sort_changes
+from .content import content_changes, response_content_changes
 from .document import Document, InputError, mapping, pointer
 from .inputs import effective_parameters, paired_bodies, parameter_changes
 from .references import Located
+from .schemas import schema_changes
 
 HTTP_METHODS = frozenset({"get", "put", "post", "delete", "options", "head", "patch", "trace"})
 STATUS = re.compile(r"(?:[1-5](?:[0-9]{2}|XX)|default)")
@@ -70,8 +72,19 @@ def input_changes(before: Document, after: Document, old_path: Located, new_path
                                   at if at in old_issues else None, at if at in new_issues else None))
     else:
         changes = parameter_changes(old_params, new_params)
-    _, _, body_findings = paired_bodies(before, after, old, new)
-    return changes + body_findings
+        for key in sorted(old_params.keys() & new_params.keys()):
+            previous, current = old_params[key], new_params[key]
+            if "content" in previous.value or "content" in current.value:
+                changes.append(Change("review", "parameter.content", "Content-based parameters are not compared.",
+                                      previous.at, current.at))
+            else:
+                changes.extend(schema_changes(before, after, previous, current, "request"))
+
+    old_body, new_body, body_findings = paired_bodies(before, after, old, new)
+    changes.extend(body_findings)
+    if old_body and new_body:
+        changes.extend(content_changes(before, after, old_body, new_body, "request"))
+    return changes
 
 
 def compare(before: Document, after: Document) -> list[Change]:
@@ -90,12 +103,15 @@ def compare(before: Document, after: Document) -> list[Change]:
         for method in old_ops.keys() | new_ops.keys():
             location = pointer(at, method)
             if method not in new_ops:
-                changes.append(Change("breaking", "operation.removed", "Removed operation.", before=location))
+                changes.append(Change("breaking", "operation.removed", "Removed operation.",
+                                      before=location, operation=location))
             elif method not in old_ops:
-                changes.append(Change("non-breaking", "operation.added", "Added operation.", after=location))
+                changes.append(Change("non-breaking", "operation.added", "Added operation.",
+                                      after=location, operation=location))
             else:
-                changes.extend(response_changes(old_ops[method], new_ops[method], location))
-                findings = input_changes(before, after, Located(old_item, at), Located(new_item, at),
-                                         Located(old_ops[method], location), Located(new_ops[method], location))
+                old, new = Located(old_ops[method], location), Located(new_ops[method], location)
+                findings = response_changes(old.value, new.value, location)
+                findings.extend(response_content_changes(before, after, old, new))
+                findings.extend(input_changes(before, after, Located(old_item, at), Located(new_item, at), old, new))
                 changes.extend(replace(change, operation=location) for change in findings)
-    return sort_changes(changes)
+    return sort_changes(list(dict.fromkeys(changes)))

@@ -1,9 +1,9 @@
 """Load a local JSON or YAML document without following references."""
 
 import json
-import math
 import re
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import ClassVar
 
@@ -35,9 +35,12 @@ def unique_object(pairs):
     return result
 
 
-def finite_float(text):
-    value = float(text)
-    if not math.isfinite(value):
+def finite_decimal(text):
+    try:
+        value = Decimal(text)
+    except InvalidOperation as exc:
+        raise InputError(f"invalid number {text!r}") from exc
+    if not value.is_finite():
         raise InputError(f"non-finite number {text!r}")
     return value
 
@@ -65,7 +68,7 @@ for kind, pattern, initials in (
 ):
     OpenAPILoader.add_implicit_resolver(f"tag:yaml.org,2002:{kind}", re.compile(pattern), initials)
 
-OpenAPILoader.add_constructor("tag:yaml.org,2002:float", lambda loader, node: finite_float(node.value))
+OpenAPILoader.add_constructor("tag:yaml.org,2002:float", lambda loader, node: finite_decimal(node.value))
 
 
 @dataclass(frozen=True)
@@ -79,8 +82,8 @@ def parse(text: str, *, json_input: bool = False) -> Document:
     """Read one OpenAPI 3.0.x or 3.1.x document; this is not a spec validator."""
     try:
         if json_input:
-            data = json.loads(text, object_pairs_hook=unique_object, parse_float=finite_float,
-                              parse_constant=finite_float)
+            data = json.loads(text, object_pairs_hook=unique_object, parse_float=finite_decimal,
+                              parse_constant=finite_decimal)
         else:
             data = yaml.load(text, Loader=OpenAPILoader)
         root = mapping(data, "")
