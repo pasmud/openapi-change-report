@@ -1,0 +1,21 @@
+{
+  "title": "Setting body required to false is a compatible relaxation",
+  "before": {
+    "openapi": "3.0.4", "info": {"title": "Stamps", "version": "1"},
+    "paths": {"/stamps": {"post": {
+      "requestBody": {"required": true, "content": {"text/plain": {"schema": {"type": "string"}}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.0.4", "info": {"title": "Stamps", "version": "1"},
+    "paths": {"/stamps": {"post": {
+      "requestBody": {"required": false, "content": {"text/plain": {"schema": {"type": "string"}}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "expected": [{
+    "severity": "non-breaking", "code": "body.optional", "operation": "/paths/~1stamps/post",
+    "before": "/paths/~1stamps/post/requestBody/required", "after": "/paths/~1stamps/post/requestBody/required"
+  }]
+}
