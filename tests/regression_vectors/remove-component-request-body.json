@@ -1,0 +1,21 @@
+{
+  "title": "Removing a referenced body reports review at the definition",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Stamps", "version": "1"},
+    "paths": {"/stamps": {"post": {
+      "requestBody": {"$ref": "#/components/requestBodies/Stamp"},
+      "responses": {"204": {"description": "Saved"}}
+    }}},
+    "components": {"requestBodies": {"Stamp": {
+      "required": true, "content": {"text/plain": {"schema": {"type": "string"}}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Stamps", "version": "1"},
+    "paths": {"/stamps": {"post": {"responses": {"204": {"description": "Saved"}}}}}
+  },
+  "expected": [{
+    "severity": "review", "code": "body.removed",
+    "before": "/components/requestBodies/Stamp", "after": null, "operation": "/paths/~1stamps/post"
+  }]
+}
