@@ -1,0 +1,21 @@
+{
+  "title": "Moving a parameter to a cookie changes its identity",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {"get": {
+      "parameters": [{"in": "query", "name": "locale", "schema": {"type": "string"}}],
+      "responses": {"200": {"description": "List"}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {"get": {
+      "parameters": [{"in": "cookie", "name": "locale", "required": true, "schema": {"type": "string"}}],
+      "responses": {"200": {"description": "List"}}
+    }}}
+  },
+  "expected": [
+    {"severity": "breaking", "code": "parameter.required", "before": null, "after": "/paths/~1books/get/parameters/0/required", "operation": "/paths/~1books/get"},
+    {"severity": "review", "code": "parameter.removed", "before": "/paths/~1books/get/parameters/0", "after": null, "operation": "/paths/~1books/get"}
+  ]
+}
