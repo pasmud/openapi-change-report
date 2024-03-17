@@ -1,0 +1,18 @@
+{
+  "title": "Promoting an unchanged operation parameter to path scope is silent",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {"get": {
+      "parameters": [{"in": "query", "name": "locale", "required": true, "schema": {"type": "string"}}],
+      "responses": {"200": {"description": "List"}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {
+      "parameters": [{"in": "query", "name": "locale", "required": true, "schema": {"type": "string"}}],
+      "get": {"responses": {"200": {"description": "List"}}}
+    }}
+  },
+  "expected": []
+}
