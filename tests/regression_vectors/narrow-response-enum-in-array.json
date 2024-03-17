@@ -1,0 +1,24 @@
+{
+  "title": "Returning fewer possible array item enum values is compatible",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Paint", "version": "1"},
+    "paths": {"/paint": {"get": {"responses": {"200": {
+      "description": "Palette", "content": {"application/json": {"schema": {
+        "type": "array", "items": {"type": "string", "enum": ["green", "blue"]}
+      }}}
+    }}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Paint", "version": "1"},
+    "paths": {"/paint": {"get": {"responses": {"200": {
+      "description": "Palette", "content": {"application/json": {"schema": {
+        "type": "array", "items": {"type": "string", "enum": ["green"]}
+      }}}
+    }}}}}
+  },
+  "expected": [{
+    "severity": "non-breaking", "code": "schema.response.enum", "operation": "/paths/~1paint/get",
+    "before": "/paths/~1paint/get/responses/200/content/application~1json/schema/items/enum",
+    "after": "/paths/~1paint/get/responses/200/content/application~1json/schema/items/enum"
+  }]
+}
