@@ -1,0 +1,20 @@
+{
+  "title": "Retaining an error range does not cover removal of default",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Receipts", "version": "1"},
+    "paths": {"/receipts": {"get": {"responses": {
+      "200": {"description": "Found"}, "4XX": {"description": "Client error"},
+      "default": {"description": "Unhandled response"}
+    }}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Receipts", "version": "1"},
+    "paths": {"/receipts": {"get": {"responses": {
+      "200": {"description": "Found"}, "4XX": {"description": "Client error"}
+    }}}}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "response.removed",
+    "before": "/paths/~1receipts/get/responses/default", "after": null, "operation": "/paths/~1receipts/get"
+  }]
+}
