@@ -1,0 +1,16 @@
+{
+  "title": "Removing a literal tilde path escapes each pointer token",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Archive", "version": "1"},
+    "paths": {"/archive/~1draft": {"head": {"responses": {"200": {"description": "Exists"}}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Archive", "version": "1"},
+    "paths": {}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "operation.removed",
+    "before": "/paths/~1archive~1~01draft/head", "after": null,
+    "operation": "/paths/~1archive~1~01draft/head"
+  }]
+}
