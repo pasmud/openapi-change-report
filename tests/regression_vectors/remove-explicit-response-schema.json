@@ -1,0 +1,20 @@
+{
+  "title": "Removing a response schema is review when its media type remains",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Profiles", "version": "1"},
+    "paths": {"/profiles": {"get": {"responses": {"200": {
+      "description": "Profile", "content": {"application/json": {"schema": {"type": "object"}}}
+    }}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Profiles", "version": "1"},
+    "paths": {"/profiles": {"get": {"responses": {"200": {
+      "description": "Profile", "content": {"application/json": {}}
+    }}}}}
+  },
+  "expected": [{
+    "severity": "review", "code": "schema.response.presence", "operation": "/paths/~1profiles/get",
+    "before": "/paths/~1profiles/get/responses/200/content/application~1json/schema",
+    "after": "/paths/~1profiles/get/responses/200/content/application~1json"
+  }]
+}
