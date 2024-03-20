@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openapi-change-report"
+version = "0.1.0"
+description = "Offline compatibility review for two OpenAPI 3 documents"
+requires-python = ">=3.11"
+dependencies = ["PyYAML>=6.0.2,<7"]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10", "ruff>=0.12,<1"]
+
+[project.scripts]
+openapi-change-report = "openapi_change_report.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["openapi_change_report*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
