@@ -1,0 +1,18 @@
+{
+  "title": "Removing DELETE does not remove the retained GET or its responses",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Notes", "version": "1"},
+    "paths": {"/notes": {
+      "delete": {"responses": {"204": {"description": "Deleted"}}},
+      "get": {"responses": {"200": {"description": "List"}}}
+    }}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Notes", "version": "1"},
+    "paths": {"/notes": {"get": {"responses": {"200": {"description": "List"}}}}}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "operation.removed",
+    "before": "/paths/~1notes/delete", "after": null, "operation": "/paths/~1notes/delete"
+  }]
+}
