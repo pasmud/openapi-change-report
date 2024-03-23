@@ -1,0 +1,18 @@
+{
+  "title": "A removed response status reports once despite its media and schema",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Receipts", "version": "1"},
+    "paths": {"/receipts": {"get": {"responses": {
+      "200": {"description": "Found"},
+      "404": {"description": "Missing", "content": {"text/plain": {"schema": {"type": "string"}}}}
+    }}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Receipts", "version": "1"},
+    "paths": {"/receipts": {"get": {"responses": {"200": {"description": "Found"}}}}}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "response.removed",
+    "before": "/paths/~1receipts/get/responses/404", "after": null, "operation": "/paths/~1receipts/get"
+  }]
+}
