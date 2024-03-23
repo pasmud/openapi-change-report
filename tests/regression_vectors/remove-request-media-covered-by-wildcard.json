@@ -1,0 +1,21 @@
+{
+  "title": "A retained request wildcard does not rescue a removed literal type",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Stamps", "version": "1"},
+    "paths": {"/stamps": {"post": {
+      "requestBody": {"content": {"text/*": {}, "text/plain": {}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Stamps", "version": "1"},
+    "paths": {"/stamps": {"post": {
+      "requestBody": {"content": {"text/*": {}}},
+      "responses": {"204": {"description": "Saved"}}
+    }}}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "media.request.removed", "operation": "/paths/~1stamps/post",
+    "before": "/paths/~1stamps/post/requestBody/content/text~1plain", "after": null
+  }]
+}
