@@ -1,0 +1,21 @@
+{
+  "title": "Removing a required parameter points to its component definition",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {"get": {
+      "parameters": [{"$ref": "#/components/parameters/Edition"}],
+      "responses": {"200": {"description": "List"}}
+    }}},
+    "components": {"parameters": {
+      "Edition": {"in": "query", "name": "edition", "required": true, "schema": {"type": "string"}}
+    }}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {"get": {"responses": {"200": {"description": "List"}}}}}
+  },
+  "expected": [{
+    "severity": "review", "code": "parameter.removed",
+    "before": "/components/parameters/Edition", "after": null, "operation": "/paths/~1books/get"
+  }]
+}
