@@ -73,6 +73,47 @@ def test_unsupported_subtree_emits_review_instead_of_a_false_type_change(unsuppo
     assert (change.code, change.severity) == ("schema.request.unsupported", "review")
 
 
+@pytest.mark.parametrize("side", ["Before", "After"])
+def test_schema_review_identifies_side_and_resolved_keyword(side):
+    def make(name, schema):
+        doc = with_schema({"$ref": f"#/components/schemas/{name}"}, "request")
+        return document(doc.paths, components={"schemas": {name: schema}})
+
+    plain = make("Plain", {"type": "string"})
+    patterned = make("Patterned", {"type": "string", "pattern": "^[A-Z]+$"})
+    documents = (patterned, plain) if side == "Before" else (plain, patterned)
+    (change,) = compare(*documents)
+    locations = {"Before": change.before, "After": change.after}
+    assert (change.code, change.severity, change.operation) == ("schema.request.unsupported", "review", OP)
+    assert change.message == f"{side}: Unsupported schema keywords: 'pattern'."
+    assert locations.pop(side) == "/components/schemas/Patterned/pattern"
+    assert list(locations.values()) == ["/components/schemas/Plain"]
+
+
+def test_schema_review_reports_both_reasons_and_still_compares_supported_sibling():
+    def make(label, weight):
+        return with_schema({"type": "object", "properties": {"label": label, "weight": {"type": weight}}},
+                           "request")
+
+    before = make({"$ref": "#/components/schemas/Missing"}, "number")
+    after = make({"enum": [{"format": "pdf"}]}, "integer")
+    breaking, review = compare(before, after)
+    assert (breaking.severity, breaking.code) == ("breaking", "schema.request.type")
+    assert (review.severity, review.code) == ("review", "schema.request.unsupported")
+    label = f"{OP}/requestBody/content/application~1json/schema/properties/label"
+    assert (review.before, review.after) == (f"{label}/$ref", f"{label}/enum")
+    assert review.message == ("Before: Local component target does not exist. "
+                              "After: Only scalar enum members are compared.")
+
+
+def test_same_unsupported_reason_is_reported_once_at_resolved_boolean_schema():
+    doc = with_schema({"$ref": "#/components/schemas/Empty"}, "response")
+    same = document(doc.paths, components={"schemas": {"Empty": False}})
+    (change,) = compare(same, same)
+    assert (change.before, change.after) == ("/components/schemas/Empty", "/components/schemas/Empty")
+    assert change.message == "Before and after: Boolean schemas are not compared."
+
+
 def test_status_and_media_removed_without_guessing_wildcard_equivalence():
     before = document({"/letters": {"post": {"requestBody": {"content": {JSON: {}, "text/plain": {}}},
                                              "responses": {"200": {"content": {JSON: {}}}, "201": {}}}}})
@@ -167,4 +208,5 @@ def test_custom_schema_dialect_needs_review():
     candidate = document(baseline.paths, jsonSchemaDialect="https://example.invalid/dialect")
     (change,) = compare(baseline, candidate)
     assert (change.code, change.severity) == ("schema.request.unsupported", "review")
-    assert "dialect" in change.message
+    assert change.message == "After: Custom OpenAPI schema dialects are not compared."
+    assert change.after == "/jsonSchemaDialect"

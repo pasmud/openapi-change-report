@@ -15,22 +15,24 @@ MAX_DEPTH = 40
 
 def resolve_schema(doc: Document, raw, at: str) -> Located:
     if doc.version.startswith("3.1.") and doc.root.get("jsonSchemaDialect", OAS_DIALECT) != OAS_DIALECT:
-        raise UnresolvedReference("Custom OpenAPI schema dialects are not compared.")
+        raise UnresolvedReference("Custom OpenAPI schema dialects are not compared.", "/jsonSchemaDialect")
     if isinstance(raw, bool):
-        raise UnresolvedReference("Boolean schemas are not compared.")
+        raise UnresolvedReference("Boolean schemas are not compared.", at)
     obj = resolve(doc, Located(mapping(raw, at), at), "schemas")
     unsupported = [key for key, value in obj.value.items()
                    if key not in KEYWORDS and key not in ANNOTATIONS and not key.startswith("x-")
                    and not (key == "additionalProperties" and value is True)
                    and not (key in {"nullable", "readOnly", "writeOnly"} and value is False)]
     if unsupported:
-        raise UnresolvedReference("Unsupported schema keywords: " + ", ".join(map(repr, sorted(unsupported))) + ".")
+        location = pointer(obj.at, unsupported[0]) if len(unsupported) == 1 else obj.at
+        keywords = ", ".join(map(repr, sorted(unsupported)))
+        raise UnresolvedReference(f"Unsupported schema keywords: {keywords}.", location)
     schema_type = obj.value.get("type", "")
     if "type" in obj.value and (not isinstance(schema_type, str) or schema_type not in TYPES
                                 or (schema_type == "null" and doc.version.startswith("3.0."))):
-        raise UnresolvedReference("Only a single supported schema type is compared.")
+        raise UnresolvedReference("Only a single supported schema type is compared.", pointer(obj.at, "type"))
     if isinstance(obj.value.get("items"), list):
-        raise UnresolvedReference("Tuple schemas are not compared.")
+        raise UnresolvedReference("Tuple schemas are not compared.", pointer(obj.at, "items"))
     return obj
 
 
@@ -42,7 +44,7 @@ def enum_values(obj: Located):
     if not isinstance(values, list) or not values:
         raise InputError(f"{at}: expected a non-empty array")
     if any(isinstance(value, (dict, list)) for value in values):
-        raise UnresolvedReference("Only scalar enum members are compared.")
+        raise UnresolvedReference("Only scalar enum members are compared.", at)
     # JSON booleans are distinct from numbers; integer and decimal spellings of a number are not.
     return {("number" if type(value) in (int, Decimal) else type(value).__name__, value) for value in values}
 
@@ -90,14 +92,27 @@ class SchemaDiff:
         if len(self.active) >= MAX_DEPTH:
             self.add("review", "unsupported", "Schema comparison depth limit reached.", old_at, new_at)
             return
-        try:
-            old = resolve_schema(self.before, old_raw, old_at)
-            new = resolve_schema(self.after, new_raw, new_at)
-            old_enum, new_enum = enum_values(old), enum_values(new)
-        except UnresolvedReference as exc:
-            self.add("review", "unsupported", str(exc), old_at, new_at)
+
+        candidates, locations, issues = [], [], {}
+        for side, doc, raw, at in (("Before", self.before, old_raw, old_at), ("After", self.after, new_raw, new_at)):
+            try:
+                obj = resolve_schema(doc, raw, at)
+                values = enum_values(obj)
+            except UnresolvedReference as exc:
+                issues[side] = str(exc)
+                locations.append(exc.at)
+            else:
+                candidates.append((obj, values))
+                locations.append(obj.at)
+        if issues:
+            if issues.get("Before") == issues.get("After"):
+                message = f"Before and after: {issues['Before']}"
+            else:
+                message = " ".join(f"{side}: {issue}" for side, issue in issues.items())
+            self.add("review", "unsupported", message, *locations)
             return
 
+        (old, old_enum), (new, new_enum) = candidates
         pair = (old.at, new.at)
         if pair in self.active:
             self.add("review", "unsupported", "Recursive schema references are not expanded.", old_at, new_at)
