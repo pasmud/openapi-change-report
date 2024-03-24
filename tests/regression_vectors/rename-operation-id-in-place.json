@@ -1,0 +1,12 @@
+{
+  "title": "Changing operationId alone preserves the matched operation",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Tiles", "version": "1"},
+    "paths": {"/tiles": {"get": {"operationId": "listTiles", "responses": {"200": {"description": "List"}}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Tiles", "version": "1"},
+    "paths": {"/tiles": {"get": {"operationId": "browseTiles", "responses": {"200": {"description": "List"}}}}}
+  },
+  "expected": []
+}
