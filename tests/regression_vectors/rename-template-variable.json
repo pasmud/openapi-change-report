@@ -1,0 +1,21 @@
+{
+  "title": "Renaming a path variable replaces rather than matches the operation",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Tiles", "version": "1"},
+    "paths": {"/tiles/{id}": {
+      "parameters": [{"in": "path", "name": "id", "required": true, "schema": {"type": "string"}}],
+      "get": {"responses": {"200": {"description": "Tile"}}}
+    }}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Tiles", "version": "1"},
+    "paths": {"/tiles/{key}": {
+      "parameters": [{"in": "path", "name": "key", "required": true, "schema": {"type": "string"}}],
+      "get": {"responses": {"200": {"description": "Tile"}}}
+    }}
+  },
+  "expected": [
+    {"severity": "breaking", "code": "operation.removed", "before": "/paths/~1tiles~1{id}/get", "after": null, "operation": "/paths/~1tiles~1{id}/get"},
+    {"severity": "non-breaking", "code": "operation.added", "before": null, "after": "/paths/~1tiles~1{key}/get", "operation": "/paths/~1tiles~1{key}/get"}
+  ]
+}
