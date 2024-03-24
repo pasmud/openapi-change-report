@@ -1,0 +1,28 @@
+{
+  "title": "Parameter matching survives reordering and reports both indices",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {"get": {
+      "parameters": [
+        {"in": "query", "name": "limit", "schema": {"type": "number"}},
+        {"in": "query", "name": "locale", "schema": {"type": "string"}}
+      ],
+      "responses": {"200": {"description": "List"}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Catalog", "version": "1"},
+    "paths": {"/books": {"get": {
+      "parameters": [
+        {"in": "query", "name": "locale", "schema": {"type": "string"}},
+        {"in": "query", "name": "limit", "schema": {"type": "integer"}}
+      ],
+      "responses": {"200": {"description": "List"}}
+    }}}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "schema.request.type", "operation": "/paths/~1books/get",
+    "before": "/paths/~1books/get/parameters/0/schema/type",
+    "after": "/paths/~1books/get/parameters/1/schema/type"
+  }]
+}
