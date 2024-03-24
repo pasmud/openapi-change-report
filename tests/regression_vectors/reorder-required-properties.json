@@ -1,0 +1,22 @@
+{
+  "title": "Reordering required names and property keys yields no finding",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Profiles", "version": "1"},
+    "paths": {"/profiles": {"get": {"responses": {"200": {
+      "description": "Profile", "content": {"application/json": {"schema": {
+        "type": "object", "required": ["label", "rank"],
+        "properties": {"label": {"type": "string"}, "rank": {"type": "integer"}}
+      }}}
+    }}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Profiles", "version": "1"},
+    "paths": {"/profiles": {"get": {"responses": {"200": {
+      "description": "Profile", "content": {"application/json": {"schema": {
+        "properties": {"rank": {"type": "integer"}, "label": {"type": "string"}},
+        "required": ["rank", "label"], "type": "object"
+      }}}
+    }}}}}
+  },
+  "expected": []
+}
