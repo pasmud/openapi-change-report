@@ -1,0 +1,15 @@
+{
+  "title": "Replacing POST with PUT on one path produces two operation findings",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Settings", "version": "1"},
+    "paths": {"/settings": {"post": {"responses": {"204": {"description": "Saved"}}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Settings", "version": "1"},
+    "paths": {"/settings": {"put": {"responses": {"204": {"description": "Saved"}}}}}
+  },
+  "expected": [
+    {"severity": "breaking", "code": "operation.removed", "before": "/paths/~1settings/post", "after": null, "operation": "/paths/~1settings/post"},
+    {"severity": "non-breaking", "code": "operation.added", "before": null, "after": "/paths/~1settings/put", "operation": "/paths/~1settings/put"}
+  ]
+}
