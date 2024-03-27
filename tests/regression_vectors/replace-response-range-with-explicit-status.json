@@ -1,0 +1,15 @@
+{
+  "title": "Documenting 202 does not preserve the replaced 2XX response key",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Receipts", "version": "1"},
+    "paths": {"/receipts": {"post": {"responses": {"2XX": {"description": "Success"}}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Receipts", "version": "1"},
+    "paths": {"/receipts": {"post": {"responses": {"202": {"description": "Queued"}}}}}
+  },
+  "expected": [
+    {"severity": "breaking", "code": "response.removed", "before": "/paths/~1receipts/post/responses/2XX", "after": null, "operation": "/paths/~1receipts/post"},
+    {"severity": "non-breaking", "code": "response.added", "before": null, "after": "/paths/~1receipts/post/responses/202", "operation": "/paths/~1receipts/post"}
+  ]
+}
