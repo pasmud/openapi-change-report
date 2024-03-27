@@ -1,0 +1,20 @@
+{
+  "title": "Overlap and equal size do not make a response enum swap compatible",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Paint", "version": "1"},
+    "paths": {"/paint": {"get": {"responses": {"200": {
+      "description": "Color", "content": {"application/json": {"schema": {"enum": ["blue", "green"]}}}
+    }}}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Paint", "version": "1"},
+    "paths": {"/paint": {"get": {"responses": {"200": {
+      "description": "Color", "content": {"application/json": {"schema": {"enum": ["blue", "red"]}}}
+    }}}}}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "schema.response.enum", "operation": "/paths/~1paint/get",
+    "before": "/paths/~1paint/get/responses/200/content/application~1json/schema/enum",
+    "after": "/paths/~1paint/get/responses/200/content/application~1json/schema/enum"
+  }]
+}
