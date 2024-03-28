@@ -81,3 +81,16 @@ def test_reports_are_stable_and_do_not_render_input_as_markup(tmp_path):
     assert results[0] == results[1]
     assert "`` /paths/~1fake`<b>/get ``" in results[0]
     assert r"/paths/~1z\n/get" in results[0]
+
+
+def test_parcel_label_example_matches_documented_migration():
+    result = cli("examples/parcel-labels.before.yaml", "examples/parcel-labels.after.json", "--format", "json")
+    assert (result.returncode, result.stderr) == (1, "")
+    report = json.loads(result.stdout)
+    assert report["summary"] == {"breaking": 6, "review": 1, "non-breaking": 1}
+    assert [change["code"] for change in report["changes"]] == [
+        "schema.request.enum", "body.required", "schema.response.required", "parameter.required",
+        "response.removed", "operation.removed", "schema.request.unsupported", "operation.added",
+    ]
+    assert report["changes"][2]["after"] == "/components/schemas/Label/required"
+    assert report["changes"][2]["operation"] == "/paths/~1labels/post"

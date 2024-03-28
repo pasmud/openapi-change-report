@@ -1,0 +1,60 @@
+{
+  "openapi": "3.1.0",
+  "info": {"title": "Fictional Parcel Label API", "version": "2.0.0"},
+  "paths": {
+    "/labels": {
+      "post": {
+        "summary": "Create a label",
+        "parameters": [{
+          "name": "X-Parcel-Region",
+          "in": "header",
+          "required": true,
+          "schema": {"type": "string"}
+        }],
+        "requestBody": {"$ref": "#/components/requestBodies/LabelInput"},
+        "responses": {
+          "200": {
+            "description": "Label created immediately",
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Label"}}}
+          }
+        }
+      }
+    },
+    "/label-formats": {
+      "get": {
+        "summary": "List supported label formats",
+        "responses": {
+          "200": {
+            "description": "Available formats",
+            "content": {"application/json": {"schema": {"type": "array", "items": {"type": "string"}}}}
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "requestBodies": {
+      "LabelInput": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "paper": {"type": "string", "enum": ["a4"]},
+                "routingHint": {"oneOf": [{"type": "string"}, {"type": "integer"}]}
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Label": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {"id": {"type": "string"}, "trackingCode": {"type": "string"}}
+      }
+    }
+  }
+}

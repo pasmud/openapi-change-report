@@ -100,3 +100,25 @@ def test_parameter_schemas_use_request_rules_and_enum_order_is_ignored():
     assert compare(make(["red", "blue"]), make(["blue", "red"])) == []
     (change,) = compare(make(["red", "blue"]), make(["red"]))
     assert (change.severity, change.after) == ("breaking", "/paths/~1letters/get/parameters/0/schema/enum")
+
+
+def test_openapi_30_supported_subset_and_nullable_boundary():
+    def make(schema):
+        return document({"/labels": {"get": {"responses": {"200": {
+            "description": "OK", "content": {JSON: {"schema": schema}},
+        }}}}}, openapi="3.0.4")
+
+    baseline = make({"type": "integer"})
+    (change,) = compare(baseline, make({"type": "number"}))
+    assert (change.code, change.severity) == ("schema.response.type", "breaking")
+    (change,) = compare(baseline, make({"type": "integer", "nullable": True}))
+    assert (change.code, change.severity) == ("schema.response.unsupported", "review")
+    assert "nullable" in change.message
+
+
+def test_custom_schema_dialect_needs_review():
+    baseline = with_schema({"type": "number"}, "request")
+    candidate = document(baseline.paths, jsonSchemaDialect="https://example.invalid/dialect")
+    (change,) = compare(baseline, candidate)
+    assert (change.code, change.severity) == ("schema.request.unsupported", "review")
+    assert "dialect" in change.message

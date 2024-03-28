@@ -1,0 +1,51 @@
+openapi: 3.1.0
+info:
+  title: Fictional Parcel Label API
+  version: 1.0.0
+paths:
+  /labels:
+    post:
+      summary: Create a label
+      requestBody:
+        $ref: '#/components/requestBodies/LabelInput'
+      responses:
+        '200':
+          description: Label created immediately
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+        '202':
+          description: Label queued for creation
+  /labels/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: {type: string}
+    delete:
+      summary: Cancel a label
+      responses:
+        '204': {description: Label cancelled}
+components:
+  requestBodies:
+    LabelInput:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              paper:
+                type: string
+                enum: [letter, a4]
+              routingHint:
+                oneOf:
+                  - {type: string}
+                  - {type: integer}
+  schemas:
+    Label:
+      type: object
+      required: [id, trackingCode]
+      properties:
+        id: {type: string}
+        trackingCode: {type: string}

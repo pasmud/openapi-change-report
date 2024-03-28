@@ -6,6 +6,9 @@ build-backend = "setuptools.build_meta"
 name = "openapi-change-report"
 version = "0.1.0"
 description = "Offline compatibility review for two OpenAPI 3 documents"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = ["PyYAML>=6.0.2,<7"]
 
