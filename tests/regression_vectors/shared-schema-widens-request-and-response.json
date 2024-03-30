@@ -1,0 +1,27 @@
+{
+  "title": "Widening a shared schema is compatible only on the request side",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Scores", "version": "1"},
+    "paths": {"/scores": {"post": {
+      "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Count"}}}},
+      "responses": {"200": {"description": "Saved", "content": {
+        "application/json": {"schema": {"$ref": "#/components/schemas/Count"}}
+      }}}
+    }}},
+    "components": {"schemas": {"Count": {"type": "integer"}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Scores", "version": "1"},
+    "paths": {"/scores": {"post": {
+      "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Score"}}}},
+      "responses": {"200": {"description": "Saved", "content": {
+        "application/json": {"schema": {"$ref": "#/components/schemas/Score"}}
+      }}}
+    }}},
+    "components": {"schemas": {"Score": {"type": "number"}}}
+  },
+  "expected": [
+    {"severity": "breaking", "code": "schema.response.type", "before": "/components/schemas/Count/type", "after": "/components/schemas/Score/type", "operation": "/paths/~1scores/post"},
+    {"severity": "non-breaking", "code": "schema.request.type", "before": "/components/schemas/Count/type", "after": "/components/schemas/Score/type", "operation": "/paths/~1scores/post"}
+  ]
+}
