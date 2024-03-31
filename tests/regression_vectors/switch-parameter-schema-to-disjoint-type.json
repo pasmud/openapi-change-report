@@ -1,0 +1,26 @@
+{
+  "title": "A matched parameter media schema rejects a disjoint input type",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Scores", "version": "1"},
+    "paths": {"/scores": {"get": {
+      "parameters": [{"in": "query", "name": "filter", "content": {
+        "application/json": {"schema": {"type": "object"}}
+      }}],
+      "responses": {"200": {"description": "Scores"}}
+    }}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Scores", "version": "1"},
+    "paths": {"/scores": {"get": {
+      "parameters": [{"in": "query", "name": "filter", "content": {
+        "application/json": {"schema": {"type": "string"}}
+      }}],
+      "responses": {"200": {"description": "Scores"}}
+    }}}
+  },
+  "expected": [{
+    "severity": "breaking", "code": "schema.request.type", "operation": "/paths/~1scores/get",
+    "before": "/paths/~1scores/get/parameters/0/content/application~1json/schema/type",
+    "after": "/paths/~1scores/get/parameters/0/content/application~1json/schema/type"
+  }]
+}
