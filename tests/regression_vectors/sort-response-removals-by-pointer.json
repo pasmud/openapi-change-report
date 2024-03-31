@@ -1,0 +1,19 @@
+{
+  "title": "Multiple status removals sort by pointer rather than input order",
+  "before": {
+    "openapi": "3.1.0", "info": {"title": "Receipts", "version": "1"},
+    "paths": {"/receipts": {"get": {"responses": {
+      "default": {"description": "Other"}, "503": {"description": "Unavailable"},
+      "200": {"description": "Found"}, "404": {"description": "Missing"}
+    }}}}
+  },
+  "after": {
+    "openapi": "3.1.0", "info": {"title": "Receipts", "version": "1"},
+    "paths": {"/receipts": {"get": {"responses": {"200": {"description": "Found"}}}}}
+  },
+  "expected": [
+    {"severity": "breaking", "code": "response.removed", "before": "/paths/~1receipts/get/responses/404", "after": null, "operation": "/paths/~1receipts/get"},
+    {"severity": "breaking", "code": "response.removed", "before": "/paths/~1receipts/get/responses/503", "after": null, "operation": "/paths/~1receipts/get"},
+    {"severity": "breaking", "code": "response.removed", "before": "/paths/~1receipts/get/responses/default", "after": null, "operation": "/paths/~1receipts/get"}
+  ]
+}
